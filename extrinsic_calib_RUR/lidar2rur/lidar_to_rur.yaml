@@ -1,0 +1,64 @@
+calibration: motion_based_hand_eye
+equation: A_base * T_base_lidar = T_base_lidar * B_lidar
+transform_direction: lidar_to_base
+parent_frame: base_footprint
+child_frame: ouster/os_sensor
+rur_odometry_topic: /odom
+lidar_odometry_topic: /genz/odometry
+mode: planar
+translation_xyz_m:
+- -0.034704397007989475
+- -1.6300687198774255
+- 0.0
+rpy_deg:
+- 0.0
+- 0.0
+- 0.5311530791188673
+quaternion_xyzw:
+- 0.0
+- 0.0
+- 0.0046351684336039915
+- 0.999989257549096
+transformation_matrix:
+- - 0.9999570304271843
+  - -0.009270237281069323
+  - 0.0
+  - -0.034704397007989475
+- - 0.009270237281069323
+  - 0.9999570304271843
+  - 0.0
+  - -1.6300687198774255
+- - 0.0
+  - 0.0
+  - 1.0
+  - 0.0
+- - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+quality:
+  optimizer_success: true
+  optimizer_message: '`ftol` termination condition is satisfied.'
+  cost: 17.641538485859478
+  translation_residual_rmse_m: 1.2563020261223117
+  rotation_residual_rmse_deg: 36.84176782273354
+  jacobian_singular_values:
+  - 17.7910589563344
+  - 5.9779540891444825
+  - 3.461131500095411
+  jacobian_condition_number: 5.140243575213471
+  synchronized_keyframes: 80
+  relative_motion_pairs: 305
+  mean_sync_delta_s: 0.0061368173875
+  max_sync_delta_s: 0.008864159
+  motion:
+    base_translation_sum_m: 435.809857535456
+    lidar_translation_sum_m: 33.88828669107001
+    base_abs_rotation_sum_deg: 6383.4614530435
+    lidar_abs_rotation_sum_deg: 380.9337042029258
+    base_max_translation_m: 3.5705875717010187
+    lidar_max_translation_m: 0.2934496184835089
+    base_max_rotation_deg: 147.38639278022066
+    lidar_max_rotation_deg: 8.995560015048559
+notes: In planar mode z/roll/pitch are copied from the initial guess; planar ground
+  motion cannot estimate them reliably.

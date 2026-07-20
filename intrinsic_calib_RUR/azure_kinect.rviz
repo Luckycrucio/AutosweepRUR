@@ -1,0 +1,20 @@
+Panels:
+  - Class: rviz/Displays
+
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz/Image
+      Name: RGB Image
+      Image Topic: /rgb/image_raw
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+  Global Options:
+    Fixed Frame: camera_base
+
+Window Geometry:
+  Height: 1000
+  Width: 1800
+  X: 50
+  Y: 50

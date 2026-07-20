@@ -1,0 +1,4 @@
+type: "chessboard" # or "checkerboard"
+rows: 5            # Interior row corners 
+cols: 6          # Interior column corners
+grid_size: 0.1095   # Distance between two corners in meters
