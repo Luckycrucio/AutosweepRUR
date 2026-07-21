@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
+import select
 import shlex
 import shutil
 import signal
 import subprocess
+import sys
 import time
 import os
 
@@ -39,7 +41,7 @@ SENSOR_TOPICS = [
     "ouster/metadata",
     "/tf",
     "/tf_static",
-    " /diagnostics",
+    "/diagnostics",
     "/ouster/imu",
     "/ousterDome/imu",
     "/odom",
@@ -214,6 +216,24 @@ def wait_for_bag_saved(bag_prefix):
             return bag_path
 
         time.sleep(1)
+
+
+def wait_for_enter_while_running(proc, name):
+    """Wait for ENTER, but fail promptly if the child process exits."""
+    print("\nPress ENTER when you want to stop recording...\n")
+
+    while True:
+        return_code = proc.poll()
+        if return_code is not None:
+            raise RuntimeError(
+                f"{name} exited unexpectedly with status {return_code}; "
+                "no recording is active."
+            )
+
+        readable, _, _ = select.select([sys.stdin], [], [], 0.25)
+        if readable:
+            sys.stdin.readline()
+            return
 
 
 def print_bag_info(bag_path):
@@ -410,7 +430,7 @@ def main():
 
                 time.sleep(4)
 
-                input("\nPress ENTER when you want to stop recording...\n")
+                wait_for_enter_while_running(bag_proc, "rosbag")
             finally:
                 terminate_process(bag_proc, "rosbag")
                 bag_proc = None
@@ -438,9 +458,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
 
 
 

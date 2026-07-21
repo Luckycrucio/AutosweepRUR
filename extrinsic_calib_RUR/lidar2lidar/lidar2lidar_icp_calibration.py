@@ -64,7 +64,7 @@ def parse_arguments():
     parser.add_argument("--iterations", default="80,60,50,40")
     parser.add_argument("--initial-rpy-deg", default="0,0,0",
                         help="Initial dome-to-spinning roll,pitch,yaw in degrees")
-    parser.add_argument("--initial-translation", default="-90,0,-90",
+    parser.add_argument("--initial-translation", default="0,0,0",
                         help="Initial dome origin in spinning frame, metres")
     parser.add_argument("--output", default=os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "dome_to_spinning.yaml"))

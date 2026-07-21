@@ -81,16 +81,15 @@ T = [ R  t ]
     [ 0  1 ]
 ```
 
-The default is `(roll=0, pitch=-90, yaw=+90)`, based on the measured mounting
-of the front dome LiDAR relative to the horizontal spinning LiDAR. With the
-rotation convention above, the resulting matrix is
-`Rz(+90) * Ry(-90) * Rx(0)`. When applied to a point, the Y rotation acts first
-and the Z rotation acts second.
+The default is the identity rotation `(roll=0, pitch=0, yaw=0)`, so both LiDAR
+coordinate frames start coincident. Use `--initial-rpy-deg` only when you want
+to supply a deliberate mechanical initial guess.
 
 Translation is specified in metres with `--initial-translation x,y,z`, where
 the vector is the dome sensor origin expressed in the spinning frame. Measure
-this displacement on the rig. Zero translation is only a placeholder and can
-cause ICP to converge incorrectly when overlap is limited.
+this displacement on the rig. The default is zero, keeping both coordinate
+frame origins coincident. Supply a measured translation explicitly when the
+identity initialization is outside ICP's convergence range.
 
 ### Multi-scale ICP
 
@@ -134,12 +133,16 @@ constrain every translation and rotation component.
 Source ROS Noetic and the workspace, then run:
 
 ```bash
-python3 extrinsic_calib_RUR/lidar2lidar/lidar2lidar_icp_calibration.py \
-  --initial-rpy-deg 0,-90,90 \
-  --initial-translation 0,0,0
+python3 extrinsic_calib_RUR/lidar2lidar/lidar2lidar_icp_calibration.py
 ```
 
-Use a measured translation in place of `0,0,0`, for example:
+The initial Open3D view uses the raw XYZ values from each point cloud and does
+not look up TF or load `dome_to_spinning.yaml`. Thus both sensor origins and
+coordinate axes begin coincident even while the normal ROS nodes continue to
+publish the existing calibrated TF tree.
+
+If a deliberate mechanical initial guess is needed, provide it explicitly, for
+example:
 
 ```bash
 python3 extrinsic_calib_RUR/lidar2lidar/lidar2lidar_icp_calibration.py \

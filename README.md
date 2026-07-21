@@ -1,3 +1,5 @@
+![AutoSweep LiDAR visualization](assets/autosweep-lidar-visualization.png)
+
 # AutoSweep
 
 ## RUR53 Data Acquisition at Eureka Test Site
@@ -52,6 +54,13 @@ the results on independent data before using them for odometry or mapping.
 
 
 ### Extrinsic Calibration
+
+### Lidar2Lidar 
+    - noetic
+    - devel
+    - activate_rur
+    - ./autosweep/extrinsic_calib_RUR/lidar2lidar/lidar2lidar_icp_calibration.py 
+
 
 ### Lidar2RUR
     - noetic
