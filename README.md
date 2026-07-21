@@ -57,7 +57,8 @@ the results on independent data before using them for odometry or mapping.
     - noetic
     - devel
     - activate_rur
-    - ./autosweep/extrinsic_calib_RUR/lidar2rur/lidar_to_rur_handeye.py 
+    - ./autosweep/sensors_drivers_RUR/sensors_drivers_stack.py --fps_camera 5 --fps_lidar 5 --lidar_res 4096
+
 
 ### Lidar2RGB (CA2LIB)
 

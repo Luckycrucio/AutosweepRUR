@@ -11,6 +11,11 @@ The underlying driver commands are:
 - roslaunch ouster_ros driver.launch sensor_hostname:=os-122220000120.local lidar_mode:=1024x10 point_type:=original
 - roslaunch azure_kinect_ros_driver driver.launch fps:=15
 
+After launching the selected drivers, the stack waits five seconds and then
+starts the calibrated RUR53 TF/CAD publisher and RViz automatically. RViz uses
+`base_footprint` as its fixed frame and loads
+`RUR53/config/rviz.yaml`.
+
 Supported rates:
 - Azure Kinect: 5, 15, 30 fps
 - Ouster OS1: 5, 10, 20 Hz  

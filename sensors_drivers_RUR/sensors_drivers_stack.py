@@ -17,17 +17,33 @@ export ROS_MASTER_URI=http://192.168.53.2:11311/
 export ROS_IP=192.168.53.15
 """
 SSD_PATH = "../../../../media/fsd/3127552a-0703-402f-ad8e-991656cc348c/autosweep/DataAcquisition22Jul/bags"
+AUTOSWEEP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUR_VISUALIZATION_PUBLISHER = os.path.join(
+    AUTOSWEEP_ROOT,
+    "RUR53",
+    "config",
+    "publish_rur53_visualization.py",
+)
+RUR_RVIZ_CONFIG = os.path.join(
+    AUTOSWEEP_ROOT,
+    "RUR53",
+    "config",
+    "rviz.yaml",
+)
 
 SENSOR_TOPICS = [
     "/rgb/image_raw",
     "/rgb/camera_info",
     "/ouster/points",
     "/ousterDome/points",
+    "ouster/metadata",
     "/tf",
     "/tf_static",
+    " /diagnostics",
     "/ouster/imu",
     "/ousterDome/imu",
     "/odom",
+    "/genz/odometry",
     "/joint_states",
     "/extended_fix",
     "/mavros/global_position/raw/gps_vel",
@@ -225,8 +241,8 @@ def main():
         "--fps-camera",
         dest="fps_camera",
         type=int,
-        default=5,
-        help="Frame per second for the Azure Kinect driver"
+        default=15,
+        help="Frame per second for the Azure Kinect driver [5, 15, 30]"
     )
 
     parser.add_argument(
@@ -235,7 +251,7 @@ def main():
         dest="fps_lidar",
         type=int,
         default=10,
-        help="Scan frequency for the Ouster driver"
+        help="Scan frequency for the Ouster driver [5, 10, 20]"
     )
 
     parser.add_argument(
@@ -253,8 +269,8 @@ def main():
     parser.add_argument(
         "--lidar_res",
         type=int,
-        default=1024,
-        help="resolution for Ouster driver"
+        default=2048,
+        help="resolution for Ouster driver [1024, 2048, 4096]"
     )
 
     args = parser.parse_args()
@@ -282,8 +298,7 @@ def main():
                 "driver.launch",
                 f"sensor_hostname:={args.sensor_hostname}",
                 f"lidar_mode:={args.lidar_res}x{args.fps_lidar}",
-                f"ouster_ns:=ouster",
-                f"tf_prefix:=ouster",  
+                "ouster_ns:=ouster",
                 "lidar_port:=7502",
                 "imu_port:=7503",
                 "timestamp_mode:=TIME_FROM_ROS_TIME",
@@ -307,7 +322,6 @@ def main():
                 "point_type:=original"],
             title="Ouster DOME Driver 2")
 
-            time.sleep(5)
         elif sensor_mode == "azure_spinning":
             # Launch the spinning Ouster
             ouster_proc = launch_terminal([
@@ -316,6 +330,7 @@ def main():
                 "driver.launch",
                 f"sensor_hostname:={args.sensor_hostname}",
                 f"lidar_mode:={args.lidar_res}x{args.fps_lidar}",
+                "ouster_ns:=ouster",
                 "lidar_port:=7502",
                 "imu_port:=7503",
                 "timestamp_mode:=TIME_FROM_ROS_TIME",
@@ -334,7 +349,6 @@ def main():
                 title="Azure Kinect Driver"
             )
 
-            time.sleep(5)
         else:
             # Launch the dome Ouster
             second_ouster_proc = launch_terminal([
@@ -363,7 +377,20 @@ def main():
                 title="Azure Kinect Driver"
             )
 
-            time.sleep(5)
+        # Give the selected sensor drivers time to advertise their topics and
+        # frames before publishing the calibrated tree and opening RViz.
+        time.sleep(5)
+        visualization_command = ["python3", RUR_VISUALIZATION_PUBLISHER]
+        if sensor_mode != "two_lidars":
+            visualization_command.append("--include-camera")
+        launch_terminal(
+            visualization_command,
+            title="RUR53 Calibrated TF and CAD"
+        )
+        launch_terminal(
+            ["rviz", "-d", RUR_RVIZ_CONFIG],
+            title="RUR53 Sensor Visualization"
+        )
 
         next_bag_name = args.bag
 
@@ -411,10 +438,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
 
 
 

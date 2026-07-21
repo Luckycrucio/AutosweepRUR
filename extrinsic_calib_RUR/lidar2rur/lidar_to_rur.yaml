@@ -2,14 +2,14 @@ calibration: motion_based_hand_eye
 equation: A_base * T_base_lidar = T_base_lidar * B_lidar
 transform_direction: lidar_to_base
 parent_frame: base_footprint
-child_frame: ouster/os_sensor
+child_frame: os_sensor
 rur_odometry_topic: /odom
 lidar_odometry_topic: /genz/odometry
 mode: planar
 translation_xyz_m:
 - 0.20066875283174632
 - -0.06322736792272732
-- 0.0
+- 0.443
 rpy_deg:
 - 0.0
 - 0.0
@@ -31,7 +31,7 @@ transformation_matrix:
 - - -0.0
   - 0.0
   - 1.0
-  - 0.0
+  - 0.443
 - - 0.0
   - 0.0
   - 0.0
@@ -81,5 +81,6 @@ quality:
     lidar_max_translation_m: 1.2734369623682382
     base_max_rotation_deg: 49.847341504081406
     lidar_max_rotation_deg: 38.560803772322146
-notes: In planar mode z/roll/pitch are copied from the initial guess; planar ground
-  motion cannot estimate them reliably.
+notes: In planar mode roll/pitch are copied from the initial guess and z is fixed
+  to the measured 0.443 m vertical offset; planar ground motion cannot estimate
+  these components reliably.

@@ -1,5 +1,5 @@
 transform_direction: dome_to_spinning
-parent_frame: ouster/os_sensor
+parent_frame: os_sensor
 child_frame: ousterDome/os_sensor
 source_topic: /ousterDome/points
 target_topic: /ouster/points
