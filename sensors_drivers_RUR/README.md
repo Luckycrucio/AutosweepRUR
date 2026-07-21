@@ -1,6 +1,12 @@
 ### Sensors Drivers [INFO]
 
-Launch ouster OS1 and Azure drivers:
+Run `sensors_drivers_stack.py` and select one of the three sensor combinations:
+
+1. Two LiDARs (spinning and dome)
+2. Azure Kinect and spinning LiDAR
+3. Azure Kinect and dome LiDAR
+
+The underlying driver commands are:
 
 - roslaunch ouster_ros driver.launch sensor_hostname:=os-122220000120.local lidar_mode:=1024x10 point_type:=original
 - roslaunch azure_kinect_ros_driver driver.launch fps:=15

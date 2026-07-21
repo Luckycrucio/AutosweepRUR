@@ -16,6 +16,7 @@ observe z, roll, or pitch.  Those components are retained from --initial-*.
 import argparse
 import math
 import os
+import sys
 import threading
 import time
 
@@ -149,6 +150,21 @@ def planar_error(left, right, rotation_weight):
     return np.array([
         error[0, 3], error[1, 3], rotation_weight * normalize_angle(yaw)
     ])
+
+
+def show_calibration_progress(completed, total):
+    """Render an in-place progress bar for the optimization stages."""
+    width = 32
+    completed = min(max(completed, 0), total)
+    filled = int(round(width * completed / total)) if total else width
+    bar = "=" * filled + "-" * (width - filled)
+    percent = int(round(100.0 * completed / total)) if total else 100
+    sys.stdout.write(
+        "\rCalibration [{}] {:3d}% ({}/{})".format(
+            bar, percent, completed, total))
+    if completed >= total:
+        sys.stdout.write("\n")
+    sys.stdout.flush()
 
 
 class TrajectoryCollector:
@@ -303,7 +319,8 @@ def motion_statistics(motions):
     }
 
 
-def solve_planar(motions, initial_transform, loss, rotation_weight):
+def solve_planar(motions, initial_transform, loss, rotation_weight,
+                 progress_callback=None):
     initial_xyz, initial_rpy = transform_to_xyz_rpy(initial_transform)
 
     def make_transform(parameters):
@@ -324,16 +341,22 @@ def solve_planar(motions, initial_transform, loss, rotation_weight):
     # Planar hand-eye yaw can have distant local minima. Try evenly spaced
     # yaw seeds and retain the best robust solution.
     solutions = []
-    for yaw_seed in np.linspace(-math.pi, math.pi, 12, endpoint=False):
+    yaw_seeds = np.linspace(-math.pi, math.pi, 12, endpoint=False)
+    if progress_callback:
+        progress_callback(0, len(yaw_seeds))
+    for seed_index, yaw_seed in enumerate(yaw_seeds, start=1):
         seed = np.array([initial_xyz[0], initial_xyz[1], yaw_seed])
         result = least_squares(
             residual, seed, loss=loss, f_scale=0.05, max_nfev=3000)
         solutions.append(result)
+        if progress_callback:
+            progress_callback(seed_index, len(yaw_seeds))
     result = min(solutions, key=lambda candidate: np.sum(candidate.fun ** 2))
     return make_transform(result.x), result
 
 
-def solve_se3(motions, initial_transform, loss, rotation_weight):
+def solve_se3(motions, initial_transform, loss, rotation_weight,
+              progress_callback=None):
     initial_xyz, initial_rpy = transform_to_xyz_rpy(initial_transform)
     initial = np.concatenate((initial_xyz, Rotation.from_euler(
         "xyz", initial_rpy).as_rotvec()))
@@ -352,8 +375,12 @@ def solve_se3(motions, initial_transform, loss, rotation_weight):
         ]
         return np.concatenate(errors)
 
+    if progress_callback:
+        progress_callback(0, 1)
     result = least_squares(
         residual, initial, loss=loss, f_scale=0.05, max_nfev=5000)
+    if progress_callback:
+        progress_callback(1, 1)
     return make_transform(result.x), result
 
 
@@ -511,12 +538,17 @@ def main():
     statistics = motion_statistics(motions)
     initial_transform = transform_from_xyz_rpy(
         initial_translation, initial_rpy)
+    rospy.loginfo(
+        "Collected %d keyframes and built %d relative-motion pairs. "
+        "Starting calibration.", len(keyframes), len(motions))
     if args.mode == "planar":
         transform, result = solve_planar(
-            motions, initial_transform, args.loss, args.rotation_weight)
+            motions, initial_transform, args.loss, args.rotation_weight,
+            show_calibration_progress)
     else:
         transform, result = solve_se3(
-            motions, initial_transform, args.loss, args.rotation_weight)
+            motions, initial_transform, args.loss, args.rotation_weight,
+            show_calibration_progress)
 
     warnings = validate_motion(args, statistics, result)
     output, document = save_result(

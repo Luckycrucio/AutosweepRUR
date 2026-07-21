@@ -7,28 +7,28 @@ rur_odometry_topic: /odom
 lidar_odometry_topic: /genz/odometry
 mode: planar
 translation_xyz_m:
-- -0.034704397007989475
-- -1.6300687198774255
+- 0.20066875283174632
+- -0.06322736792272732
 - 0.0
 rpy_deg:
 - 0.0
 - 0.0
-- 0.5311530791188673
+- -0.9316453687085661
 quaternion_xyzw:
 - 0.0
 - 0.0
-- 0.0046351684336039915
-- 0.999989257549096
+- -0.008130050006844292
+- 0.9999669505973116
 transformation_matrix:
-- - 0.9999570304271843
-  - -0.009270237281069323
+- - 0.9998678045737723
+  - 0.016259562627095478
   - 0.0
-  - -0.034704397007989475
-- - 0.009270237281069323
-  - 0.9999570304271843
-  - 0.0
-  - -1.6300687198774255
-- - 0.0
+  - 0.20066875283174632
+- - -0.016259562627095478
+  - 0.9998678045737723
+  - -0.0
+  - -0.06322736792272732
+- - -0.0
   - 0.0
   - 1.0
   - 0.0
@@ -37,28 +37,49 @@ transformation_matrix:
   - 0.0
   - 1.0
 quality:
+  # True when the numerical optimizer terminates without reporting a failure.
+  # This confirms convergence, but does not by itself guarantee an accurate calibration.
   optimizer_success: true
+  # Reason reported by the optimizer for stopping. `ftol` means that the reduction
+  # of the objective function became smaller than the configured tolerance.
   optimizer_message: '`ftol` termination condition is satisfied.'
-  cost: 17.641538485859478
-  translation_residual_rmse_m: 1.2563020261223117
-  rotation_residual_rmse_deg: 36.84176782273354
+  # Final value of the least-squares objective minimized by the optimizer.
+  # Lower is better, but it is only directly comparable between runs that use the
+  # same residual definitions, weights, number of pairs, and optimizer settings.
+  cost: 0.5883193277879195
+  # Root-mean-square disagreement between corresponding base and LiDAR relative
+  # translations after applying the estimated transform, expressed in metres.
+  translation_residual_rmse_m: 0.03427182439739077
+  # Root-mean-square disagreement between corresponding relative rotations after
+  # applying the estimated transform, expressed in degrees.
+  rotation_residual_rmse_deg: 4.217947242685025
+  # Singular values of the optimizer Jacobian for the estimated planar parameters.
+  # Values far from zero indicate observable directions; similarly sized values
+  # indicate that the parameters are constrained with comparable strength.
   jacobian_singular_values:
-  - 17.7910589563344
-  - 5.9779540891444825
-  - 3.461131500095411
-  jacobian_condition_number: 5.140243575213471
+  - 7.883040464511387
+  - 4.527322009475279
+  - 3.33724006164259
+  # Ratio of the largest Jacobian singular value to the smallest. Values near 1
+  # are best; a very large value indicates weak observability or poor conditioning.
+  jacobian_condition_number: 2.3621436632974353
+  # Number of time-aligned base/LiDAR odometry poses retained as keyframes.
   synchronized_keyframes: 80
+  # Number of relative-motion constraints constructed from the synchronized
+  # keyframes and used by the hand-eye optimizer.
   relative_motion_pairs: 305
-  mean_sync_delta_s: 0.0061368173875
-  max_sync_delta_s: 0.008864159
+  # Mean absolute time difference, in seconds, between each paired base and LiDAR pose.
+  mean_sync_delta_s: 0.004468083100000001
+  # Largest absolute time difference, in seconds, among synchronized pose pairs.
+  max_sync_delta_s: 0.005561145
   motion:
-    base_translation_sum_m: 435.809857535456
-    lidar_translation_sum_m: 33.88828669107001
-    base_abs_rotation_sum_deg: 6383.4614530435
-    lidar_abs_rotation_sum_deg: 380.9337042029258
-    base_max_translation_m: 3.5705875717010187
-    lidar_max_translation_m: 0.2934496184835089
-    base_max_rotation_deg: 147.38639278022066
-    lidar_max_rotation_deg: 8.995560015048559
+    base_translation_sum_m: 123.24243665617676
+    lidar_translation_sum_m: 119.78960200888173
+    base_abs_rotation_sum_deg: 3693.407238754576
+    lidar_abs_rotation_sum_deg: 2834.7440739363706
+    base_max_translation_m: 1.3045536652579237
+    lidar_max_translation_m: 1.2734369623682382
+    base_max_rotation_deg: 49.847341504081406
+    lidar_max_rotation_deg: 38.560803772322146
 notes: In planar mode z/roll/pitch are copied from the initial guess; planar ground
   motion cannot estimate them reliably.

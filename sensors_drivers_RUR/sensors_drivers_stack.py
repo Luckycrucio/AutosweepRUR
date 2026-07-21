@@ -147,14 +147,18 @@ def confirm(msg="Continue? [y/n]: "):
 def ask_sensor_mode():
     while True:
         choice = input(
-            "Select sensor mode: [1] two LiDARs, [2] one LiDAR and camera: "
+            "Select sensor mode: [1] two LiDARs, [2] Azure and spinning, "
+            "[3] Azure and dome: "
         ).strip().lower()
 
         if choice in ("1", "two lidars", "lidars"):
             return "two_lidars"
 
-        if choice in ("2", "one lidar and camera", "lidar_camera"):
-            return "lidar_camera"
+        if choice in ("2", "azure and spinning", "azure_spinning"):
+            return "azure_spinning"
+
+        if choice in ("3", "azure and dome", "azure_dome"):
+            return "azure_dome"
 
 
 def normalize_bag_prefix(bag_name):
@@ -304,8 +308,8 @@ def main():
             title="Ouster DOME Driver 2")
 
             time.sleep(5)
-        else:
-            # Launch Ouster
+        elif sensor_mode == "azure_spinning":
+            # Launch the spinning Ouster
             ouster_proc = launch_terminal([
                 "roslaunch",
                 "ouster_ros",
@@ -317,7 +321,36 @@ def main():
                 "timestamp_mode:=TIME_FROM_ROS_TIME",
                 "viz:=false",
                 "point_type:=original"],
-            title="Ouster OS1 Driver")
+            title="Ouster Spinning Driver")
+
+            # Launch Azure Kinect immediately in its own terminal.
+            azure_proc = launch_terminal(
+                [
+                    "roslaunch",
+                    "azure_kinect_ros_driver",
+                    "driver.launch",
+                    f"fps:={args.fps_camera}"
+                ],
+                title="Azure Kinect Driver"
+            )
+
+            time.sleep(5)
+        else:
+            # Launch the dome Ouster
+            second_ouster_proc = launch_terminal([
+                "roslaunch",
+                "ouster_ros",
+                "driver.launch",
+                f"sensor_hostname:={args.second_sensor_hostname}",
+                f"lidar_mode:={args.lidar_res}x{args.fps_lidar}",
+                "ouster_ns:=ousterDome",
+                "tf_prefix:=ousterDome",
+                "lidar_port:=7504",
+                "imu_port:=7505",
+                "timestamp_mode:=TIME_FROM_ROS_TIME",
+                "viz:=false",
+                "point_type:=original"],
+            title="Ouster Dome Driver")
 
             # Launch Azure Kinect immediately in its own terminal.
             azure_proc = launch_terminal(
@@ -378,7 +411,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
 
